@@ -1,5 +1,5 @@
 const axios = require('axios');
-const fs = require('fs-extra');
+import fs from 'fs-extra' ;
 const path = require('path');
 
 module.exports = {

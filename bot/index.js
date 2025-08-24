@@ -9,7 +9,8 @@ const { exec } = require('child_process');
 const sharp = require('sharp');
 
 import fs from 'fs-extra';
-/*import path from 'path';
+import path from 'path';
+/*
 import login from 'nexus-fca';
 import winston from 'winston';
 import { GoogleGenAI } from '@google/genai';

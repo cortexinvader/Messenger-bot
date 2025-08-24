@@ -12,7 +12,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import login from 'nexus-fca';
 import winston from 'winston';
-import { GoogleGenAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import axios from 'axios';
 import { exec } from 'child_process';
 import sharp from 'sharp';

@@ -24,22 +24,21 @@ module.exports = {
             // You would use a real weather API here
             const apiKey = process.env.WEATHER_API_KEY || 'your_weather_api_key';
             
-            // For demonstration, we'll simulate a weather response
+            // Weather API integration needed - using placeholder for now
             const weatherData = {
                 location: location,
-                temperature: Math.floor(Math.random() * 30) + 10,
-                condition: ['Sunny', 'Cloudy', 'Rainy', 'Snowy'][Math.floor(Math.random() * 4)],
-                humidity: Math.floor(Math.random() * 100),
-                windSpeed: Math.floor(Math.random() * 20)
+                temperature: '??',
+                condition: 'Weather API not configured',
+                humidity: '??',
+                windSpeed: '??'
             };
             
             const weatherText = `
 🌤️ Weather for ${weatherData.location}
 
-🌡️ Temperature: ${weatherData.temperature}°C
-☁️ Condition: ${weatherData.condition}
-💧 Humidity: ${weatherData.humidity}%
-💨 Wind Speed: ${weatherData.windSpeed} km/h
+❌ Weather API not configured
+Please set WEATHER_API_KEY environment variable
+to enable real weather data.
             `.trim();
             
             api.sendMessage(weatherText, threadID);

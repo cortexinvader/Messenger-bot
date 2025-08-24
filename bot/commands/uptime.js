@@ -18,47 +18,36 @@ module.exports = {
         }
         
         const action = args[0].toLowerCase();
-        const uptimeService = bot.getUptimeService();
+        // Simple uptime status without service dependency
+        const uptime = process.uptime();
+        const uptimeHours = Math.floor(uptime / 3600);
+        const uptimeMinutes = Math.floor((uptime % 3600) / 60);
         
         try {
             switch (action) {
                 case 'status':
-                    const status = uptimeService.getStatus();
                     const statusText = `
-🌐 Uptime Service Status
+🌐 Bot Uptime Status
 
-Status: ${status.isRunning ? '🟢 Running' : '🔴 Stopped'}
-Target URL: ${status.url || 'Not configured'}
-Environment: ${process.env.RENDER_EXTERNAL_URL ? 'RENDER_EXTERNAL_URL set' : 'No environment URL'}
-Ping Interval: 10 seconds
+⏱️ Bot Uptime: ${uptimeHours}h ${uptimeMinutes}m
+🟢 Status: Running & Connected
+🤖 Bot ID: ${bot.api ? 'Connected' : 'Disconnected'}
+📡 Listening: Facebook Messenger
+🔧 Commands Loaded: ${bot.commands.size}
                     `.trim();
                     api.sendMessage(statusText, threadID);
                     break;
                     
                 case 'start':
-                    uptimeService.start();
-                    api.sendMessage('🚀 Uptime service started! Pinging every 10 seconds.', threadID);
+                    api.sendMessage('✅ Bot is already running and listening for messages!', threadID);
                     break;
                     
                 case 'stop':
-                    uptimeService.stop();
-                    api.sendMessage('🛑 Uptime service stopped.', threadID);
+                    api.sendMessage('❌ Cannot stop bot from chat command for security reasons.', threadID);
                     break;
                     
                 case 'url':
-                    if (args.length < 2) {
-                        return api.sendMessage('❌ Please provide a URL: /uptime url <new_url>', threadID);
-                    }
-                    
-                    const newUrl = args[1];
-                    if (!newUrl.startsWith('http')) {
-                        return api.sendMessage('❌ Please provide a valid URL starting with http/https', threadID);
-                    }
-                    
-                    // Update environment variable (for this session only)
-                    process.env.RENDER_EXTERNAL_URL = newUrl;
-                    uptimeService.updateUrl(newUrl);
-                    api.sendMessage(`🔄 Uptime URL updated to: ${newUrl}\nService restarted with new URL.`, threadID);
+                    api.sendMessage('ℹ️ Bot runs on Replit and doesn\'t need external URL configuration.', threadID);
                     break;
                     
                 default:

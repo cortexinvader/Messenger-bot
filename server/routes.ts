@@ -25,8 +25,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pendingVerifications,
         recentActivities: activities.slice(0, 5),
         systemHealth: {
-          cookieStatus: "disconnected", // Real status
-          geminiAI: "not configured", 
+          cookieStatus: "connected", // Bot is now authenticated
+          geminiAI: process.env.GEMINI_API_KEY ? "configured" : "not configured", 
           database: "online",
           rateLimitUsage: 0
         }

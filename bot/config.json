@@ -1,6 +1,6 @@
 {
   "prefix": "/",
-  "owners": ["100000000000000"],
+  "owners": ["61553565805276"],
   "gemini": {
     "apiKey": "",
     "model": "gemini-2.5-flash",

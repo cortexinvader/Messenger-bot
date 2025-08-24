@@ -8,10 +8,8 @@
     "noEmit": true,
 
     /* Module system */
-    //"module": "ESNext",
-    "moduleResolution": "node16",   // ✅ fixes require/import mixing
-    "module":"commonjs",
-    "allowImportingTsExtensions": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
 
     /* Language features */
     "target": "ESNext",

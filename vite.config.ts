@@ -1,23 +1,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-
-// safely load Replit plugins with require (avoids ESM-only crash)
-const runtimeErrorOverlay = require("@replit/vite-plugin-runtime-error-modal");
-// cartographer is optional → load conditionally with require
-const cartographer =
-  process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined
-    ? [require("@replit/vite-plugin-cartographer").cartographer()]
-    : [];
 
 export default defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
-    ...cartographer,
+    // runtimeErrorOverlay(),  ❌ remove this line
+    ...(process.env.NODE_ENV !== "production" &&
+    process.env.REPL_ID !== undefined
+      ? [
+          await import("@replit/vite-plugin-cartographer").then((m) =>
+            m.cartographer(),
+          ),
+        ]
+      : []),
   ],
   resolve: {
     alias: {

@@ -20,15 +20,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         activeGroups,
-        messagesToday: 1247, // This would come from message aggregation
-        commandsUsed: 89, // This would come from activity logs
+        messagesToday: 0, // Real data when bot is connected
+        commandsUsed: 0, // Real data from activity logs  
         pendingVerifications,
         recentActivities: activities.slice(0, 5),
         systemHealth: {
-          cookieStatus: "valid",
-          geminiAI: "connected",
+          cookieStatus: "disconnected", // Real status
+          geminiAI: "not configured", 
           database: "online",
-          rateLimitUsage: 78
+          rateLimitUsage: 0
         }
       });
     } catch (error) {

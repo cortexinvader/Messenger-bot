@@ -1,10 +1,11 @@
-import { defineConfig } from "drizzle-kit";
+// drizzle.config.js
+const { defineConfig } = require("drizzle-kit");
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL, ensure the database is provisioned");
 }
 
-export default defineConfig({
+module.exports = defineConfig({
   out: "./migrations",
   schema: "./shared/schema.ts",
   dialect: "postgresql",

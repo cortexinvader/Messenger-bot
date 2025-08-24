@@ -1,10 +1,29 @@
 const fs = require('fs-extra');
 const path = require('path');
-const login = require('fca-unofficial');
+const login = require('nexus-fca'); // switched to nexus-fca
+const winston = require('winston');
 const { GoogleGenAI } = require('@google/generative-ai');
 const axios = require('axios');
 const { exec } = require('child_process');
 const sharp = require('sharp');
+
+// Create log folder if missing
+const logDirectory = path.join(__dirname, '../logs');
+fs.ensureDirSync(logDirectory);
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `[${timestamp}] ${level}: ${message}`;
+    })
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: path.join(logDirectory, 'bot.log') }),
+  ],
+});
 
 class NexusFCABot {
     constructor() {
@@ -15,15 +34,20 @@ class NexusFCABot {
         this.loadConfig();
         this.loadCommands();
         this.initializeGemini();
+        this.log('Bot instance created');
+    }
+
+    log(...args) {
+        logger.info(args.map(a => (typeof a === 'object' ? JSON.stringify(a) : a)).join(' '));
     }
 
     async loadConfig() {
         try {
             const configPath = path.join(__dirname, 'config.json');
             this.config = await fs.readJson(configPath);
-            console.log('✅ Config loaded successfully');
+            this.log('✅ Config loaded successfully');
         } catch (error) {
-            console.error('❌ Failed to load config:', error.message);
+            this.log('❌ Failed to load config:', error.message);
             process.exit(1);
         }
     }
@@ -32,17 +56,17 @@ class NexusFCABot {
         try {
             const commandsDir = path.join(__dirname, 'commands');
             const files = await fs.readdir(commandsDir);
-            
+
             for (const file of files) {
                 if (file.endsWith('.js')) {
                     delete require.cache[path.join(commandsDir, file)];
                     const command = require(path.join(commandsDir, file));
                     this.commands.set(command.name, command);
-                    console.log(`📋 Loaded command: ${command.name}`);
+                    this.log(`📋 Loaded command: ${command.name}`);
                 }
             }
         } catch (error) {
-            console.error('❌ Failed to load commands:', error.message);
+            this.log('❌ Failed to load commands:', error.message);
         }
     }
 
@@ -50,32 +74,33 @@ class NexusFCABot {
         const apiKey = process.env.GEMINI_API_KEY || this.config.gemini?.apiKey;
         if (apiKey) {
             this.geminiAI = new GoogleGenAI({ apiKey });
-            console.log('🧠 Gemini AI initialized');
+            this.log('🧠 Gemini AI initialized');
         } else {
-            console.warn('⚠️ Gemini API key not found');
+            this.log('⚠️ Gemini API key not found');
         }
     }
 
     async start() {
         try {
+            this.log('Starting bot...');
             const cookiePath = path.join(__dirname, 'cookies', 'facebook.json');
             let loginData;
 
             if (await fs.pathExists(cookiePath)) {
                 loginData = await fs.readJson(cookiePath);
-                console.log('🍪 Using saved cookies');
+                this.log('🍪 Using saved cookies');
             } else {
                 throw new Error('No cookies found. Please provide Facebook cookies.');
             }
 
             login(loginData, async (err, api) => {
                 if (err) {
-                    console.error('❌ Login failed:', err);
+                    this.log('❌ Login failed:', err);
                     return;
                 }
 
                 this.api = api;
-                console.log('✅ Bot logged in successfully');
+                this.log('✅ Bot logged in successfully');
 
                 // Save updated cookies
                 await this.saveCookies(api.getAppState());
@@ -91,12 +116,15 @@ class NexusFCABot {
                     userAgent: this.config.userAgent || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
                 });
 
+                this.log('Bot options set:', JSON.stringify(api.getOptions()));
+
                 // Start listening
                 api.listenMqtt(this.handleMessage.bind(this));
+                this.log('Listening for Messenger events...');
             });
 
         } catch (error) {
-            console.error('❌ Failed to start bot:', error.message);
+            this.log('❌ Failed to start bot:', error.message);
         }
     }
 
@@ -105,40 +133,50 @@ class NexusFCABot {
             const cookiesDir = path.join(__dirname, 'cookies');
             await fs.ensureDir(cookiesDir);
             await fs.writeJson(path.join(cookiesDir, 'facebook.json'), appState, { spaces: 2 });
-            console.log('🍪 Cookies saved');
+            this.log('🍪 Cookies saved');
         } catch (error) {
-            console.error('❌ Failed to save cookies:', error.message);
+            this.log('❌ Failed to save cookies:', error.message);
         }
     }
 
     async handleMessage(err, event) {
         if (err) {
-            console.error('❌ Message handling error:', err);
+            this.log('❌ Message handling error:', err);
             return;
         }
+        this.log('Received event:', JSON.stringify(event));
 
         try {
             switch (event.type) {
                 case 'message':
+                    this.log('Processing message:', event.body);
                     await this.processMessage(event);
                     break;
                 case 'event':
+                    this.log('Processing event:', event.logMessageType);
                     await this.processEvent(event);
                     break;
+                default:
+                    this.log('Unknown event type:', event.type);
             }
         } catch (error) {
-            console.error('❌ Error processing message:', error.message);
+            this.log('❌ Error processing message:', error.message);
         }
     }
 
     async processMessage(message) {
         const { threadID, senderID, body, attachments } = message;
-        
+        this.log('Message received:', { threadID, senderID, body });
+
         // Skip bot's own messages
-        if (senderID === this.api.getCurrentUserID()) return;
+        if (senderID === this.api.getCurrentUserID()) {
+            this.log('Skipping own message');
+            return;
+        }
 
         // Check if group is verified
         if (!await this.isGroupVerified(threadID)) {
+            this.log('Group not verified:', threadID);
             return;
         }
 
@@ -147,6 +185,7 @@ class NexusFCABot {
 
         // Handle commands
         if (body && body.startsWith('/')) {
+            this.log('Command detected:', body);
             await this.handleCommand(message);
             return;
         }
@@ -154,8 +193,10 @@ class NexusFCABot {
         // Handle AI responses
         if (await this.isAIEnabledForGroup(threadID)) {
             if (attachments && attachments.length > 0) {
+                this.log('Image attachments detected');
                 await this.handleImageAnalysis(message);
             } else if (body) {
+                this.log('AI response for text');
                 await this.handleAIResponse(message);
             }
         }
@@ -165,30 +206,41 @@ class NexusFCABot {
         const { threadID, senderID, body } = message;
         const args = body.slice(1).split(' ');
         const commandName = args.shift().toLowerCase();
-        
+
+        this.log('Handling command:', commandName, 'Args:', args);
+
         const command = this.commands.get(commandName);
         if (!command) {
-            return this.api.sendMessage('❌ Command not found. Use /help to see available commands.', threadID);
+            this.api.sendMessage('❌ Command not found. Use /help to see available commands.', threadID);
+            this.log('Command not found:', commandName);
+            return;
         }
 
         // Check permissions
         const userPermission = await this.getUserPermission(senderID, threadID);
+        this.log('User permission:', userPermission, 'Required:', command.permission);
         if (!this.hasPermission(userPermission, command.permission)) {
-            return this.api.sendMessage('❌ You don\'t have permission to use this command.', threadID);
+            this.api.sendMessage('❌ You don\'t have permission to use this command.', threadID);
+            this.log('Permission denied for user:', senderID);
+            return;
         }
 
         try {
             await command.execute(this.api, message, args, this);
+            this.log('Command executed successfully:', commandName);
         } catch (error) {
-            console.error(`❌ Command error (${commandName}):`, error.message);
+            this.log(`❌ Command error (${commandName}):`, error.message);
             this.api.sendMessage('❌ An error occurred while executing the command.', threadID);
         }
     }
 
     async handleAIResponse(message) {
         const { threadID, body } = message;
-        
-        if (!this.geminiAI) return;
+
+        if (!this.geminiAI) {
+            this.log('Gemini AI not initialized');
+            return;
+        }
 
         try {
             const response = await this.geminiAI.models.generateContent({
@@ -197,12 +249,14 @@ class NexusFCABot {
             });
 
             const aiResponse = response.text;
+            this.log('AI response:', aiResponse);
             if (aiResponse) {
                 this.api.sendMessage(`🤖 ${aiResponse}`, threadID);
+                this.log('Sent AI response to Messenger');
             }
         } catch (error) {
-            console.error('❌ AI response error:', error.message);
-            
+            this.log('❌ AI response error:', error.message);
+
             // Try fallback models
             if (error.message.includes('429')) {
                 await this.handleFallbackAI(message);
@@ -212,19 +266,23 @@ class NexusFCABot {
 
     async handleImageAnalysis(message) {
         const { threadID, attachments } = message;
-        
-        if (!this.geminiAI || !await this.isImageAnalysisEnabled(threadID)) return;
+
+        if (!this.geminiAI || !await this.isImageAnalysisEnabled(threadID)) {
+            this.log('Image analysis not enabled or Gemini AI missing');
+            return;
+        }
 
         try {
             for (const attachment of attachments) {
                 if (attachment.type === 'photo') {
+                    this.log('Processing image attachment');
                     const imageUrl = attachment.url || attachment.hiresUrl;
                     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
                     const imageBuffer = Buffer.from(response.data);
-                    
+
                     // Convert to JPEG if needed
                     const jpegBuffer = await sharp(imageBuffer).jpeg().toBuffer();
-                    
+
                     const contents = [
                         {
                             inlineData: {
@@ -240,30 +298,32 @@ class NexusFCABot {
                         contents: contents,
                     });
 
+                    this.log('Image AI response:', aiResponse.text);
                     if (aiResponse.text) {
                         this.api.sendMessage(`🖼️ Image Analysis: ${aiResponse.text}`, threadID);
+                        this.log('Sent image analysis result');
                     }
                 }
             }
         } catch (error) {
-            console.error('❌ Image analysis error:', error.message);
+            this.log('❌ Image analysis error:', error.message);
         }
     }
 
     async handleFallbackAI(message) {
-        // Implement fallback AI models here
-        console.log('🔄 Using fallback AI model');
+        this.log('🔄 Using fallback AI model');
         // This would use alternative AI services when Gemini fails
     }
 
     async processEvent(event) {
+        this.log('Processing Messenger event:', event.logMessageType);
         // Handle group joins, leaves, etc.
-        console.log('📅 Event received:', event.logMessageType);
     }
 
     async getUserPermission(userID, threadID) {
         // Check if user is owner
         if (this.config.owners && this.config.owners.includes(userID)) {
+            this.log('User is owner:', userID);
             return 'owner';
         }
 
@@ -272,12 +332,14 @@ class NexusFCABot {
             const threadInfo = await this.api.getThreadInfo(threadID);
             const userInfo = threadInfo.participantIDs.find(p => p.userID === userID);
             if (userInfo && userInfo.type === 'admin') {
+                this.log('User is admin:', userID);
                 return 'admin';
             }
         } catch (error) {
-            console.error('❌ Failed to get user permission:', error.message);
+            this.log('❌ Failed to get user permission:', error.message);
         }
 
+        this.log('User is normal user:', userID);
         return 'user';
     }
 
@@ -290,16 +352,19 @@ class NexusFCABot {
 
     async isGroupVerified(threadID) {
         // In a real implementation, this would check the database
+        this.log('Assuming group is verified:', threadID);
         return true; // For now, assume all groups are verified
     }
 
     async isAIEnabledForGroup(threadID) {
         // In a real implementation, this would check the database
+        this.log('Assuming AI is enabled for group:', threadID);
         return true; // For now, assume AI is enabled for all groups
     }
 
     async isImageAnalysisEnabled(threadID) {
         // In a real implementation, this would check the database
+        this.log('Assuming image analysis is enabled for group:', threadID);
         return true; // For now, assume image analysis is enabled
     }
 
@@ -313,17 +378,20 @@ class NexusFCABot {
             messageType: message.attachments?.length > 0 ? 'image' : 'text',
             timestamp: new Date()
         };
-        
-        console.log('📝 Message logged:', logEntry);
+
+        this.log('📝 Message logged:', logEntry);
     }
 
     async executeShellCommand(command, userID) {
+        this.log('Executing shell command:', command, 'User:', userID);
         // Only allow for authorized users with owner approval
         return new Promise((resolve, reject) => {
             exec(command, { timeout: 30000 }, (error, stdout, stderr) => {
                 if (error) {
+                    this.log('Shell command error:', error);
                     reject(error);
                 } else {
+                    this.log('Shell command output:', stdout || stderr);
                     resolve(stdout || stderr);
                 }
             });

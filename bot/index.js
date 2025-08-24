@@ -1,6 +1,6 @@
 
 //const fs = require('fs-extra');
-const path = require('path');
+//const path = require('path');
 const login = require('nexus-fca'); // switched to nexus-fca
 const winston = require('winston');
 const { GoogleGenAI } = require('@google/generative-ai');

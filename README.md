@@ -1,4 +1,4 @@
-# Sentinel FCA Bot Management System
+# Sentinel Messanger Chatbot 
 
 A comprehensive Facebook Chat Bot management system built with modern web technologies. This system allows you to manage Facebook group interactions, install dynamic commands, configure AI responses, and monitor activity—all powered by Sentinel FCA (built on nexus-016).
 

@@ -124,7 +124,6 @@ class NexusFCABot {
                 // Set bot options
                 api.setOptions({
                     listenEvents: true,
-                    pageID: this.config.pageID,
                     updatePresence: true,
                     forceLogin: true,
                     autoMarkDelivery: false,

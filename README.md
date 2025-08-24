@@ -1,7 +1,6 @@
+# Sentinel FCA Bot Management System
 
-# Nexus FCA Bot Management System
-
-A comprehensive Facebook Chat Bot management system built with modern web technologies. This system allows you to manage Facebook group interactions, install dynamic commands, configure AI responses through Google's Gemini AI, and monitor bot activities through an intuitive web interface.
+A comprehensive Facebook Chat Bot management system built with modern web technologies. This system allows you to manage Facebook group interactions, install dynamic commands, configure AI responses, and monitor activity—all powered by Sentinel FCA (built on nexus-016).
 
 ## 🚀 Features
 
@@ -31,7 +30,7 @@ A comprehensive Facebook Chat Bot management system built with modern web techno
 - SQLite fallback service for local data (in `server/services/database.ts`)
 
 ### Bot Integration
-- **nexus-016** for Facebook Messenger API
+- **nexus-016** for Facebook Messenger API (Sentinel FCA)
 - **Google Gemini AI** for conversational features
 - Modular command system with permission levels
 - Image analysis and shell access capabilities
@@ -39,7 +38,7 @@ A comprehensive Facebook Chat Bot management system built with modern web techno
 ## 📋 Prerequisites
 
 - Node.js 20 or higher
-- PostgreSQL database (automatically configured on Replit)
+- PostgreSQL database
 - Facebook account with cookies/appstate
 - Google Gemini API key
 
@@ -47,11 +46,11 @@ A comprehensive Facebook Chat Bot management system built with modern web techno
 
 ### 1. Environment Variables
 
-Set up the following environment variables in Replit Secrets:
+Set up the following environment variables in your environment (using `.env` or your platform's secret manager):
 
 - `GEMINI_API_KEY`: Your Google Gemini AI API key
 - `FACEBOOK_APPSTATE` (optional): Your Facebook cookies/appstate JSON
-- `DATABASE_URL`: PostgreSQL connection string (auto-configured on Replit)
+- `DATABASE_URL`: PostgreSQL connection string
 
 ### 2. Facebook Authentication
 
@@ -96,7 +95,7 @@ Edit `/bot/config.json` to customize your bot:
 
 ### 4. Database Setup
 
-The project uses PostgreSQL with Drizzle ORM. The database is automatically provisioned on Replit.
+The project uses PostgreSQL with Drizzle ORM.
 
 To set up the database schema:
 
@@ -104,17 +103,13 @@ To set up the database schema:
 npm run db:push
 ```
 
-The database configuration is handled in `drizzle.config.ts` and uses the `DATABASE_URL` environment variable which is automatically set by Replit when you enable PostgreSQL.
+The database configuration is handled in `drizzle.config.ts` and uses the `DATABASE_URL` environment variable.
 
-### 5. Running the Application
+### 5. Build and Start Commands
 
-Click the **Run** button in Replit, or use:
-
-```bash
-npm run dev
-```
-
-The application will be available at your Replit URL.
+- **Build command**: `npm run build`
+- **Start command**: `npm run start`
+- **Development command**: `npm run dev`
 
 ## 🎯 Usage Guide
 
@@ -200,31 +195,17 @@ module.exports = {
 
 ## 🚀 Deployment
 
-The project is configured for Replit deployment:
+To deploy Sentinel FCA Bot Management System:
 
-### Build and Start Commands
-
-- **Build command**: `npm run build`
-- **Start command**: `npm run start`
-- **Development command**: `npm run dev`
-
-### Deployment Steps
-
-1. Ensure all environment variables are set in Replit Secrets
-2. Test the application using the Run button
-3. Click the "Deploy" button in Replit to create a production deployment
-4. Configure the deployment settings:
-   - Build command: `npm run build`
-   - Run command: `npm run start`
-   - Set any required environment variables
-5. Your bot will be available at `<your-repl-name>.replit.app`
-
-### Environment Variables for Deployment
-
-Make sure these are set in your Replit Secrets:
-- `GEMINI_API_KEY`: Your Google Gemini AI API key
-- `DATABASE_URL`: PostgreSQL connection string (auto-configured on Replit)
-- `FACEBOOK_APPSTATE` (optional): Your Facebook cookies/appstate JSON
+1. Ensure all environment variables are set.
+2. Build the project:
+   ```bash
+   npm run build
+   ```
+3. Start the application:
+   ```bash
+   npm run start
+   ```
 
 ## 🔒 Security Features
 
@@ -249,14 +230,14 @@ Make sure these are set in your Replit Secrets:
 - Review server logs for detailed errors
 
 **Database connection issues:**
-- Ensure PostgreSQL is enabled in your Repl
-- Check DATABASE_URL environment variable in Secrets
+- Ensure PostgreSQL is enabled and reachable
+- Check DATABASE_URL environment variable
 - Run `npm run db:push` to sync schema
 - For local development, SQLite is used as fallback
 
 ### Logs and Debugging
 
-Check the console output in Replit for detailed logs:
+Check the console output for detailed logs:
 - Bot connection status
 - API request/response logs
 - Error messages and stack traces

@@ -413,4 +413,4 @@ class NexusFCABot {
 const bot = new NexusFCABot();
 bot.start();
 
-module.exports = NexusFCABot;
+//module.exports = NexusFCABot;

@@ -1,0 +1,20 @@
+[
+    {
+        "key": "c_user",
+        "value": "your_facebook_user_id",
+        "domain": ".facebook.com",
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2025-01-01T00:00:00.000Z",
+        "lastAccessed": "2025-01-01T00:00:00.000Z"
+    },
+    {
+        "key": "xs",
+        "value": "your_xs_token_here",
+        "domain": ".facebook.com", 
+        "path": "/",
+        "hostOnly": false,
+        "creation": "2025-01-01T00:00:00.000Z",
+        "lastAccessed": "2025-01-01T00:00:00.000Z"
+    }
+]

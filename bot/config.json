@@ -1,0 +1,35 @@
+{
+  "prefix": "/",
+  "owners": ["100000000000000"],
+  "gemini": {
+    "apiKey": "",
+    "model": "gemini-2.5-flash",
+    "temperature": 0.7,
+    "enabled": true
+  },
+  "fallback": {
+    "primary": "openai",
+    "secondary": "local",
+    "autoSwitch": true
+  },
+  "rateLimit": {
+    "threshold": 100,
+    "window": 3600000
+  },
+  "features": {
+    "autoSaveCookies": true,
+    "imageAnalysis": true,
+    "shellAccess": true,
+    "dynamicCommands": true
+  },
+  "security": {
+    "requireGroupVerification": true,
+    "ownerApprovalForShell": true,
+    "maxShellTimeout": 30000
+  },
+  "database": {
+    "path": "./data/bot.db",
+    "backupInterval": 86400000
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}

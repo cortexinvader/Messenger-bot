@@ -2,22 +2,37 @@
   "include": ["client/src/**/*", "shared/**/*", "server/**/*"],
   "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
+    /* Build settings */
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "noEmit": true,
+
+    /* Module system */
     "module": "ESNext",
-    "strict": true,
+    "moduleResolution": "node16",   // ✅ fixes require/import mixing
+    "allowImportingTsExtensions": true,
+
+    /* Language features */
+    "target": "ESNext",
     "lib": ["esnext", "dom", "dom.iterable"],
     "jsx": "preserve",
+    "strict": true,
+
+    /* Interop */
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Performance & safety */
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
+
+    /* Paths / Aliases */
     "baseUrl": ".",
-    "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./client/src/*"],
       "@shared/*": ["./shared/*"]
-    }
+    },
+
+    /* Types */
+    "types": ["node", "vite/client"]
   }
 }

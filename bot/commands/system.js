@@ -48,19 +48,22 @@ module.exports = {
 🤖 AI Requests Today: ${geminiStats.requestCount}
 📊 AI Usage: ${Math.round(geminiStats.usagePercentage)}%
 🎯 Rate Limit: ${geminiStats.rateLimitThreshold}/hour
-🧠 AI Model: ${geminiStats.model}
+🧠 AI Model: ${geminiStats.model}${geminiStats.isUsingFallback ? ' (Fallback)' : ''}
 🔄 Auto Uptime: ${process.env.RENDER_EXTERNAL_URL ? 'Configured' : 'Not configured'}
+⚡ Fallback System: ${geminiStats.fallbackModels.length} models available
                     `.trim();
                     
                     api.sendMessage(stats, threadID);
                     break;
                     
                 case 'health':
+                    const healthStats = bot.getGeminiService().getUsageStats();
                     const health = `
 🏥 System Health Check
 
 🔌 Bot Status: ${bot.isConnected() ? '✅ Healthy' : '❌ Disconnected'}
-🧠 AI Service: ${bot.getGeminiService().getUsageStats().enabled ? '✅ Online' : '⚠️ Disabled'}
+🧠 AI Service: ${healthStats.enabled ? '✅ Online' : '⚠️ Disabled'}
+🔄 AI Fallback: ${healthStats.isUsingFallback ? '⚠️ Using Fallback' : '✅ Primary Model'}
 🌐 Uptime Service: ${bot.getUptimeService().getStatus().isRunning ? '✅ Running' : '⚠️ Stopped'}
 💾 Database: ✅ Connected
 📁 Commands: ✅ ${commands.size} loaded

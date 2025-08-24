@@ -6,10 +6,11 @@ module.exports = {
     name: 'cmd',
     description: 'Install or delete commands dynamically',
     permission: 'owner',
-    usage: '/cmd <-i|-del> <url_or_filename>',
+    usage: '/cmd <-i|-del> <url_or_filename> [inline_code]',
     examples: [
         '/cmd -i https://pastebin.com/raw/xyz123',
         '/cmd -i https://raw.githubusercontent.com/user/repo/main/command.js',
+        '/cmd -i test.js module.exports = { name: "test", execute: async (api, msg) => api.sendMessage("Hello!", msg.threadID) }',
         '/cmd -del weather.js'
     ],
     
@@ -17,7 +18,7 @@ module.exports = {
         const { threadID } = message;
         
         if (args.length < 2) {
-            return api.sendMessage('❌ Usage: /cmd <-i|-del> <url_or_filename>', threadID);
+            return api.sendMessage('❌ Usage: /cmd <-i|-del> <url_or_filename> [inline_code]\n\nExamples:\n• /cmd -i https://pastebin.com/raw/xyz123\n• /cmd -i test.js module.exports = {...}\n• /cmd -del commandname', threadID);
         }
         
         const action = args[0].toLowerCase();
@@ -27,16 +28,28 @@ module.exports = {
             switch (action) {
                 case '-i':
                 case 'install':
-                    if (!target.startsWith('http')) {
-                        return api.sendMessage('❌ Please provide a valid URL (GitHub raw, Pastebin, etc.)', threadID);
-                    }
-                    
-                    api.sendMessage('⏳ Installing command from URL...', threadID);
+                    api.sendMessage('⏳ Installing command...', threadID);
                     
                     try {
-                        // Download command file
-                        const response = await axios.get(target, { timeout: 30000 });
-                        const commandCode = response.data;
+                        let commandCode;
+                        
+                        // Check if it's a URL or inline code
+                        if (target.startsWith('http')) {
+                            // Download command file from URL
+                            const response = await axios.get(target, { timeout: 30000 });
+                            commandCode = response.data;
+                        } else if (target.endsWith('.js') && args.length > 2) {
+                            // Handle inline code: /cmd -i filename.js const code = "...";
+                            const filename = target;
+                            commandCode = args.slice(2).join(' ');
+                            
+                            // Basic validation for inline code
+                            if (!commandCode.includes('module.exports') || commandCode.length < 50) {
+                                return api.sendMessage('❌ Invalid inline code. Must include module.exports and proper command structure.', threadID);
+                            }
+                        } else {
+                            return api.sendMessage('❌ Please provide either:\n• A valid URL (GitHub raw, Pastebin, etc.)\n• Inline code: /cmd -i filename.js module.exports = {...}', threadID);
+                        }
                         
                         // Validate command structure
                         if (!commandCode.includes('module.exports') || 

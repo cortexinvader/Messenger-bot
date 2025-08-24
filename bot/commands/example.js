@@ -35,23 +35,83 @@ module.exports = {
         try {
             // Example: Simple response
             if (args.length === 0) {
-                return api.sendMessage('Hello! This is an example command.', threadID);
+                return api.sendMessage('Hello! This is an example command.\n\nAvailable demos:\n/example text - Text response\n/example image - Send image\n/example media - Media examples', threadID);
             }
             
-            // Example: Echo back the arguments
-            const userInput = args.join(' ');
-            api.sendMessage(`You said: ${userInput}`, threadID);
+            const action = args[0].toLowerCase();
             
-            // Example: Send a formatted message
-            const responseText = `
+            switch (action) {
+                case 'text':
+                    // Example: Echo back the arguments
+                    const userInput = args.slice(1).join(' ');
+                    const responseText = `
 🤖 Example Command Response
 
 👤 User: ${senderName}
 💬 Input: ${userInput}
 🕒 Time: ${new Date().toLocaleString()}
-            `.trim();
-            
-            api.sendMessage(responseText, threadID);
+                    `.trim();
+                    
+                    api.sendMessage(responseText, threadID);
+                    break;
+                    
+                case 'image':
+                    // Example: Send image from URL
+                    api.sendMessage('📸 Sending example image...', threadID);
+                    const imageUrl = 'https://picsum.photos/400/300';
+                    const success = await bot.sendImageFromUrl(imageUrl, threadID, 'This is an example image!');
+                    if (!success) {
+                        api.sendMessage('❌ Failed to send image example', threadID);
+                    }
+                    break;
+                    
+                case 'media':
+                    // Example: Media sending examples
+                    const mediaExamples = `
+📱 Media Sending Examples:
+
+🖼️ **Images:**
+\`\`\`javascript
+// Send image from URL
+await bot.sendImageFromUrl('https://example.com/image.jpg', threadID, 'Caption here');
+
+// Send local image file
+await bot.sendMedia('/path/to/image.jpg', threadID, 'image');
+\`\`\`
+
+🎥 **Videos:**
+\`\`\`javascript
+// Send local video file
+await bot.sendMedia('/path/to/video.mp4', threadID, 'video');
+\`\`\`
+
+🎵 **Audio:**
+\`\`\`javascript
+// Send local audio file
+await bot.sendMedia('/path/to/audio.mp3', threadID, 'audio');
+\`\`\`
+
+📄 **Files:**
+\`\`\`javascript
+// Send any file as attachment
+const fs = require('fs');
+const attachment = fs.createReadStream('/path/to/file.pdf');
+api.sendMessage({ attachment }, threadID);
+\`\`\`
+
+💡 **Tips:**
+- Use /media command for URL-based media
+- Local files require full file paths
+- Videos and audio work best as local files
+- Images support both URL and local files
+                    `;
+                    
+                    api.sendMessage(mediaExamples, threadID);
+                    break;
+                    
+                default:
+                    api.sendMessage('❌ Available actions: text, image, media', threadID);
+            }
             
         } catch (error) {
             console.error('Example command error:', error.message);

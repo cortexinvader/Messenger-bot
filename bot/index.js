@@ -42,10 +42,14 @@ class NexusFCABot {
         this.config = null;
         this.commands = new Map();
         this.geminiAI = null;
-        this.loadConfig();
-        this.loadCommands();
-        this.initializeGemini();
         this.log('Bot instance created');
+    }
+
+    async initialize() {
+        await this.loadConfig();
+        await this.loadCommands();
+        this.initializeGemini();
+        this.log('Bot initialized successfully');
     }
 
     log(...args) {
@@ -412,6 +416,11 @@ class NexusFCABot {
 
 // Start the bot
 const bot = new NexusFCABot();
-bot.start();
+bot.initialize().then(() => {
+    bot.start();
+}).catch((error) => {
+    console.error('Failed to initialize bot:', error);
+    process.exit(1);
+});
 
 //module.exports = NexusFCABot;

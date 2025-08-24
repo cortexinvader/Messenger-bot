@@ -8,7 +8,7 @@
     "noEmit": true,
 
     /* Module system */
-    "module": "CommonJS",
+    "module": "ESNext",
     "moduleResolution": "node",
 
     /* Language features */

@@ -25,9 +25,10 @@ A comprehensive Facebook Chat Bot management system built with modern web techno
 
 ### Backend
 - **Express.js** server with TypeScript
-- **Drizzle ORM** with PostgreSQL
+- **Drizzle ORM** with PostgreSQL database
 - RESTful APIs for bot management
 - Session management and authentication
+- SQLite fallback service for local data (in `server/services/database.ts`)
 
 ### Bot Integration
 - **nexus-016** for Facebook Messenger API
@@ -95,11 +96,15 @@ Edit `/bot/config.json` to customize your bot:
 
 ### 4. Database Setup
 
-The database is automatically configured on Replit. To manually set up:
+The project uses PostgreSQL with Drizzle ORM. The database is automatically provisioned on Replit.
+
+To set up the database schema:
 
 ```bash
 npm run db:push
 ```
+
+The database configuration is handled in `drizzle.config.ts` and uses the `DATABASE_URL` environment variable which is automatically set by Replit when you enable PostgreSQL.
 
 ### 5. Running the Application
 
@@ -197,12 +202,29 @@ module.exports = {
 
 The project is configured for Replit deployment:
 
-1. Ensure all environment variables are set
-2. Test the application locally
-3. Use Replit's deployment features for production
+### Build and Start Commands
 
-Build command: `npm run build`
-Start command: `npm run start`
+- **Build command**: `npm run build`
+- **Start command**: `npm run start`
+- **Development command**: `npm run dev`
+
+### Deployment Steps
+
+1. Ensure all environment variables are set in Replit Secrets
+2. Test the application using the Run button
+3. Click the "Deploy" button in Replit to create a production deployment
+4. Configure the deployment settings:
+   - Build command: `npm run build`
+   - Run command: `npm run start`
+   - Set any required environment variables
+5. Your bot will be available at `<your-repl-name>.replit.app`
+
+### Environment Variables for Deployment
+
+Make sure these are set in your Replit Secrets:
+- `GEMINI_API_KEY`: Your Google Gemini AI API key
+- `DATABASE_URL`: PostgreSQL connection string (auto-configured on Replit)
+- `FACEBOOK_APPSTATE` (optional): Your Facebook cookies/appstate JSON
 
 ## 🔒 Security Features
 
@@ -227,9 +249,10 @@ Start command: `npm run start`
 - Review server logs for detailed errors
 
 **Database connection issues:**
-- Ensure PostgreSQL is running
-- Check DATABASE_URL environment variable
+- Ensure PostgreSQL is enabled in your Repl
+- Check DATABASE_URL environment variable in Secrets
 - Run `npm run db:push` to sync schema
+- For local development, SQLite is used as fallback
 
 ### Logs and Debugging
 

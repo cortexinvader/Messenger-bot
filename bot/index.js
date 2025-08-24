@@ -102,7 +102,8 @@ class NexusFCABot {
             let loginData;
 
             if (await fs.pathExists(cookiePath)) {
-                loginData = await fs.readJson(cookiePath);
+                const cookieData = await fs.readJson(cookiePath);
+                loginData = { appState: cookieData };
                 this.log('🍪 Using saved cookies');
             } else {
                 throw new Error('No cookies found. Please provide Facebook cookies.');

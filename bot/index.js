@@ -58,7 +58,7 @@ class NexusFCABot {
 
     async loadConfig() {
         try {
-            const configPath = path.join(__dirname, 'bot', 'config.json');
+            const configPath = path.join(__dirname, 'config.json');
             this.config = await fs.readJson(configPath);
             this.log('✅ Config loaded successfully');
         } catch (error) {
@@ -69,7 +69,7 @@ class NexusFCABot {
 
     async loadCommands() {
         try {
-            const commandsDir = path.join(__dirname, 'bot', 'commands');
+            const commandsDir = path.join(__dirname, 'commands');
             const files = await fs.readdir(commandsDir);
 
             for (const file of files) {
@@ -98,7 +98,7 @@ class NexusFCABot {
     async start() {
         try {
             this.log('Starting bot...');
-            const cookiePath = path.join(__dirname, 'bot', 'cookies', 'facebook.json');
+            const cookiePath = path.join(__dirname, 'cookies', 'facebook.json');
             let loginData;
 
             if (await fs.pathExists(cookiePath)) {
@@ -145,7 +145,7 @@ class NexusFCABot {
 
     async saveCookies(appState) {
         try {
-            const cookiesDir = path.join(__dirname, 'bot',  'cookies');
+            const cookiesDir = path.join(__dirname,  'cookies');
             await fs.ensureDir(cookiesDir);
             await fs.writeJson(path.join(cookiesDir, 'facebook.json'), appState, { spaces: 2 });
             this.log('🍪 Cookies saved');

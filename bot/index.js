@@ -1,6 +1,6 @@
 
-//const fs = require('fs-extra');
-//const path = require('path');
+const fs = require('fs-extra');
+const path = require('path');
 const login = require('nexus-fca'); // switched to nexus-fca
 const winston = require('winston');
 const { GoogleGenAI } = require('@google/generative-ai');
@@ -8,8 +8,8 @@ const axios = require('axios');
 const { exec } = require('child_process');
 const sharp = require('sharp');
 
-import fs from 'fs-extra';
-import path from 'path';
+//import fs from 'fs-extra';
+//import path from 'path';
 /*
 import login from 'nexus-fca';
 import winston from 'winston';
